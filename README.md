@@ -6,7 +6,7 @@
 
 [![License: CC-BY 4.0](https://img.shields.io/badge/License-CC--BY%204.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![Dataset](https://img.shields.io/badge/HuggingFace-Dataset-orange)](https://huggingface.co/datasets/Ahmed-AdelB/ai-security-incidents-2025-2026)
-[![DOI](https://zenodo.org/badge/DOI/TBD.svg)](https://doi.org/TBD)
+[![DOI](https://zenodo.org/badge/DOI/[ZENODO_DOI].svg)](https://doi.org/[ZENODO_DOI])
 
 The first large-scale open dataset correlating real-world LLM security incidents with EU AI Act compliance requirements.
 

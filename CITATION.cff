@@ -15,7 +15,7 @@ authors:
     email: "ahmedalderai91@gmail.com"
     affiliation: "PhD Researcher, AI Safety & Compliance Engineering"
 version: "1.0.0"
-date-released: 2026-04-01
+date-released: 2026-04-05
 license: CC-BY-4.0
 repository-code: "https://github.com/Ahmed-AdelB/ai-security-incidents-2025-2026"
 url: "https://huggingface.co/datasets/Ahmed-AdelB/ai-security-incidents-2025-2026"
@@ -37,4 +37,4 @@ preferred-citation:
       given-names: "Ahmed Adel Bakr"
   year: 2026
   url: "https://huggingface.co/datasets/Ahmed-AdelB/ai-security-incidents-2025-2026"
-  doi: ""
+  doi: "[ZENODO_DOI]"
