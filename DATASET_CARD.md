@@ -44,18 +44,19 @@ dataset_info:
   - name: data_classification
     dtype: string
   splits:
-  - name: train
+  - name: verified
+    num_bytes: 5800
+    num_examples: 12
+  - name: full
     num_bytes: 26544
     num_examples: 55
 configs:
-- config_name: all
-  data_files:
-  - path: ai-leaks-incidents-public.json
+- config_name: default
+  data_splits:
+  - split_name: verified
+  - split_name: full
   default: true
-- config_name: verified
-  data_files:
-  - path: ai-leaks-incidents-public.json
-size_in_bytes: 26544
+size_in_bytes: 32344
 ---
 
 # AI System Security Incidents 2025–2026
