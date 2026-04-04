@@ -1,0 +1,98 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://huggingface.co/datasets/ai-security-incidents-2025-2026/schema.json",
+  "title": "AI Security Incident",
+  "description": "Schema for an AI system security incident record in the AISecIncidents-2025-26 dataset.",
+  "type": "object",
+  "required": [
+    "incident_name",
+    "company",
+    "type",
+    "how",
+    "what_exposed",
+    "accessibility",
+    "severity",
+    "verified",
+    "date_missing",
+    "data_classification"
+  ],
+  "properties": {
+    "incident_name": {
+      "type": "string",
+      "description": "Unique descriptive name for the incident."
+    },
+    "company": {
+      "type": "string",
+      "description": "Primary organization affected or responsible."
+    },
+    "date": {
+      "type": ["string", "null"],
+      "format": "date",
+      "description": "ISO 8601 date of incident discovery or disclosure (null if unknown)."
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "supply_chain",
+        "source_code",
+        "user_data",
+        "training_data",
+        "api_keys",
+        "model_weights",
+        "system_prompt",
+        "api_vulnerability",
+        "state_sponsored_misuse"
+      ],
+      "description": "Primary vulnerability or incident class."
+    },
+    "how": {
+      "type": "string",
+      "description": "Brief technical description of the attack vector or method."
+    },
+    "what_exposed": {
+      "type": "string",
+      "description": "Description of data, model, or capability that was exposed or compromised."
+    },
+    "accessibility": {
+      "type": "string",
+      "enum": ["live", "patched", "taken_down", "contained", "archived", "unknown"],
+      "description": "Current accessibility status of the vulnerability or exposed data."
+    },
+    "severity": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low"],
+      "description": "Severity classification based on impact and accessibility."
+    },
+    "urls": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "string",
+        "format": "uri"
+      },
+      "description": "Public source URLs confirming or documenting the incident."
+    },
+    "cve": {
+      "type": ["string", "null"],
+      "pattern": "^CVE-\\d{4}-\\d{4,}$",
+      "description": "CVE identifier if a formal vulnerability was assigned (null if none)."
+    },
+    "notes": {
+      "type": ["string", "null"],
+      "description": "Additional context, mitigation details, or researcher notes."
+    },
+    "verified": {
+      "type": "boolean",
+      "description": "True if the incident has at least one independently confirmed public source."
+    },
+    "date_missing": {
+      "type": "boolean",
+      "description": "True if no reliable date is available for this incident."
+    },
+    "data_classification": {
+      "type": "string",
+      "enum": ["public_sources_only", "redacted_internal_data", "unverified"],
+      "description": "Data sourcing classification: public_sources_only (verified, unredacted), redacted_internal_data (sanitized before publication), unverified (no public sources found)."
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,312 @@
+\documentclass[10pt,conference]{IEEEtran}
+
+% Required packages
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{xcolor}
+\usepackage{algorithm}
+\usepackage{algorithmic}
+
+% Listings configuration
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    showstringspaces=false,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{red}
+}
+
+\begin{document}
+
+\title{AISecIncidents-2025-26: A Dataset of AI Security Breaches with EU AI Act Compliance Mapping and Static Analysis of Claude Code}
+
+\author{
+\IEEEauthorblockN{Ahmed Adel Bakr Alderai}
+\IEEEauthorblockA{Independent Researcher\\
+Email: ahmed.adel.bakr@gmail.com}
+}
+
+\maketitle
+
+\begin{abstract}
+We present AISecIncidents-2025-26, a dataset of 55 AI security incidents spanning January 2025 to April 2026, of which 12 are verified through multi-source public confirmation and 43 are documented with structured confidence scores. Severity assessment reveals 76.4\% of incidents classified as High or Critical (20 Critical, 22 High, 13 Medium).
+
+Alongside the dataset, we conduct a systematic static analysis of 1,332 TypeScript source files from a production AI agent (Claude Code v2.1.88). Our analysis reveals 23 AST-based security checks in the BashTool execution engine, a novel \emph{Semantic Desync} vulnerability class arising from non-deterministic LLM intent mapped to deterministic parser execution, and UNDERCOVER MODE---a 57,000-word instruction set with implications for transparency requirements.
+
+We map findings to EU AI Act compliance requirements (Articles 9, 13, and 15) and release a multi-label classification benchmark (aisec-euaiact-v1.0, $n=12$ ground truth labels) for evaluating automated compliance classification systems.
+\end{abstract}
+
+\begin{IEEEkeywords}
+AI security incidents, LLM supply chain security, EU AI Act compliance, dataset of security breaches, AI governance, vulnerability taxonomy, static analysis, multi-agent research methodology
+\end{IEEEkeywords}
+
+\section{INTRODUCTION}
+\label{sec:introduction}
+
+The deployment of large language models (LLMs) in production systems has created a new class of operational security risks that remain poorly characterized in the academic literature. While AI safety research has extensively addressed alignment, robustness, and fairness concerns~\cite{papernot2019}, the empirical study of security incidents in deployed LLM systems---including supply chain compromises, unauthorized model distillation, and system prompt extraction---remains fragmented and lacks standardized documentation.
+
+This work addresses the empirical gap between theoretical threat modeling and real-world incident archaeology. We present AISecIncidents-2025-26, a comprehensive dataset of 55 AI security incidents spanning January 2025 to April 2026. The dataset comprises 12 incidents verified with multi-source public confirmation and 43 incidents documented with structured confidence scores on a 0--1 scale. Our methodology employs a parallel multi-agent research pipeline with source triangulation to achieve precision verification.
+
+A distinguishing contribution of this work is the systematic static analysis of Claude Code v2.1.88, a production AI agent whose TypeScript source code became available for analysis through publicly distributed npm source maps. Our analysis of 1,332 source files reveals 23 AST-based security checks in the BashTool execution engine, a previously undocumented \emph{Semantic Desync} vulnerability class, and UNDERCOVER MODE---a 57,000-word instruction set with significant implications for transparency requirements under the EU AI Act~\cite{euaiact2024}.
+
+The dataset is mapped to EU AI Act compliance requirements (Articles 9, 13, and 15), providing a framework for regulatory assessment. We release aisec-euaiact-v1.0, a multi-label classification benchmark with 12 ground-truth labels for evaluating automated compliance classification systems.
+
+\textbf{Key contributions:} (1) First large-scale open dataset correlating real-world LLM security incidents with regulatory compliance requirements; (2) Novel static analysis framework for AI agent security assessment with 23 AST-based checks and Semantic Desync vulnerability classification; (3) Discovery and analysis of a 57,000-word hidden instruction set in Claude Code with regulatory implications; (4) Standardized incident taxonomy with confidence scoring enabling quantitative benchmarking of incident response effectiveness.
+
+\section{RELATED WORK}
+\label{sec:related-work}
+
+\subsection{Machine Learning Security Taxonomies}
+
+Papernot et al.~\cite{papernot2019} established foundational taxonomies for ML security threats, including model stealing, membership inference, and adversarial example attacks. Their work predates the widespread deployment of LLM systems and does not address regulatory compliance frameworks that have emerged subsequently. Our dataset extends their threat model to production LLM systems and adds the regulatory compliance dimension.
+
+Biggio and Roli~\cite{biggio2018} advanced theoretical foundations of adversarial machine learning with practical scaling considerations. Their characterization of ``wild patterns''---attacks that exploit the gap between training and deployment distributions---provides theoretical grounding for understanding incidents in our dataset involving prompt injection and model extraction.
+
+\subsection{AI Governance and Fairness}
+
+Selbst et al.~\cite{selbst2018} examined the abstraction barriers in machine learning systems that complicate fairness and accountability efforts. Their analysis of how technical abstractions can obscure sociotechnical concerns is relevant to our finding of \emph{Semantic Desync}, where the abstraction layer between LLM intent and parser execution creates security vulnerabilities.
+
+The EU AI Act~\cite{euaiact2024} establishes a risk-based regulatory framework for AI systems, with specific obligations for high-risk AI including risk management systems (Article 9), transparency requirements (Article 13), and accuracy/robustness standards (Article 15). Our dataset provides the first empirical assessment of how real-world LLM security incidents map to these specific regulatory requirements.
+
+\subsection{AI Incident Databases and Vulnerability Frameworks}
+
+The AI Incident Database (AIID) catalogs AI-related harms across diverse application domains. While comprehensive in scope, AIID lacks systematic EU AI Act compliance mapping and does not employ multi-source verification for security incidents. Our work complements AIID by focusing specifically on security breaches with regulatory compliance assessment frameworks.
+
+The OWASP LLM Top 10 2025~\cite{owasp_llm2025} provides a practitioner-oriented taxonomy of LLM application vulnerabilities. Our dataset operationalizes several of these categories---including prompt injection, insecure output handling, and supply chain vulnerabilities---as empirically observed incidents with documented impact and regulatory implications.
+
+\section{AISECINCIDENTS-2025-26 DATASET}
+\label{sec:dataset}
+
+\subsection{Collection Methodology}
+
+The dataset was constructed using a 12-agent parallel research pipeline with the following agent specializations:
+
+\begin{itemize}
+    \item \textbf{Source Discovery Agents:} Systematic monitoring of security advisories, bug bounty disclosures, and threat intelligence feeds.
+    \item \textbf{Credibility Assessment Agents:} Multi-source triangulation and confidence scoring based on source independence and reputation.
+    \item \textbf{Incident Classification Agents:} Taxonomy assignment and severity scoring according to CVSS-inspired criteria adapted for AI-specific risks.
+    \item \textbf{Regulatory Mapping Agents:} EU AI Act Article mapping and compliance assessment.
+\end{itemize}
+
+Inter-agent triangulation protocols require confirmation from at least two independent sources for verification status. Incidents receive confidence scores on a 0--1 scale based on source reliability and corroboration level.
+
+\subsection{Taxonomy}
+
+Incidents are classified across nine vulnerability types. Table~\ref{tab:taxonomy} presents the distribution.
+
+\begin{table}[htbp]
+\caption{Incident Taxonomy Distribution}
+\label{tab:taxonomy}
+\centering
+\begin{tabular}{lr}
+\toprule
+\textbf{Vulnerability Class} & \textbf{Count} \\
+\midrule
+Source code exposure & 16 \\
+Training data leakage & 9 \\
+User data breaches & 8 \\
+Supply chain attacks & 6 \\
+API key compromise & 5 \\
+API vulnerabilities & 4 \\
+System prompt extraction & 3 \\
+Model weight theft & 3 \\
+State-sponsored attacks & 1 \\
+\midrule
+\textbf{Total} & \textbf{55} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Verification Tiers}
+
+The dataset employs a two-tier verification system:
+
+\begin{itemize}
+    \item \textbf{Verified (12 incidents):} Multi-source confirmation with independently verifiable public sources.
+    \item \textbf{Unverified (43 incidents):} Single-source reports or threat intelligence with confidence scoring.
+\end{itemize}
+
+This tiered approach balances precision (verified incidents serve as ground truth) with recall (unverified incidents capture the broader threat landscape).
+
+\subsection{Severity Distribution}
+
+Severity assessment follows CVSS-inspired criteria adapted for AI-specific risks. Table~\ref{tab:severity} presents the distribution across all 55 incidents.
+
+\begin{table}[htbp]
+\caption{Severity Distribution}
+\label{tab:severity}
+\centering
+\begin{tabular}{lrr}
+\toprule
+\textbf{Severity} & \textbf{Count} & \textbf{Percentage} \\
+\midrule
+Critical & 20 & 36.4\% \\
+High & 22 & 40.0\% \\
+Medium & 13 & 23.6\% \\
+\midrule
+\textbf{Total} & \textbf{55} & \textbf{100\%} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{STATIC ANALYSIS OF CLAUDE CODE V2.1.88}
+\label{sec:static-analysis}
+
+\subsection{BashTool: AST-Based Security Checks}
+\label{subsec:bashtool}
+
+Analysis of the BashTool execution engine reveals 23 AST-based security checks implemented in TypeScript. These checks operate on abstract syntax trees of bash commands to detect potentially dangerous operations. The checks are organized into five functional categories:
+
+\begin{enumerate}
+    \item \textbf{Blocklist Detection (6 checks):} Commands matching known-dangerous patterns (e.g., \texttt{rm -rf}, \texttt{mkfs}, \texttt{dd} with device targets).
+    \item \textbf{Subshell Detection (5 checks):} Identification of command substitution patterns (\texttt{\$(...)}, backticks) that may obfuscate malicious payloads.
+    \item \textbf{Path Traversal Detection (4 checks):} Analysis of relative path constructions (\texttt{../}, \texttt{./}) and symlink following in file system operations.
+    \item \textbf{Redirection Analysis (4 checks):} Detection of suspicious I/O redirections, including append-to-system-file and network socket redirections.
+    \item \textbf{Pipeline Sanitization (4 checks):} Multi-command chain analysis to detect data exfiltration via pipelines and chained command execution.
+\end{enumerate}
+
+The AST-based approach provides semantic understanding of command structures beyond simple string matching, enabling detection of obfuscated or encoded attack patterns. However, as we discuss in Section~\ref{subsec:semantic-desync}, the semantic gap between LLM-generated intent and parser-executed checks introduces residual vulnerabilities.
+
+\subsection{Semantic Desync Vulnerability Class}
+\label{subsec:semantic-desync}
+
+Our analysis identifies a novel vulnerability class we term \emph{Semantic Desync}, arising from the architectural separation between LLM intent interpretation and deterministic parser execution:
+
+\begin{definition}[Semantic Desync]
+A vulnerability occurring when non-deterministic LLM-generated intent is mapped to deterministic parser execution, creating a semantic gap where the parser's interpretation diverges from the LLM's intended meaning, potentially allowing hidden instructions to override visible safety constraints.
+\end{definition}
+
+This vulnerability class is particularly relevant for AI agents that parse natural language instructions into executable code or system commands. The non-deterministic nature of LLM outputs combined with deterministic parsing logic creates inherent semantic ambiguity that can be exploited. In the context of Claude Code, Semantic Desync manifests when the BashTool AST parser interprets a command structure differently from the LLM's generated intent, enabling circumvention of the 23 AST-based checks described in Section~\ref{subsec:bashtool}.
+
+The CVE-2025-55284 Claude Code DNS exfiltration vulnerability~\cite{cve2025_55284} exemplifies this class: the LLM generates what it interprets as a benign network diagnostic command, while the bash parser executes it as a DNS-based data exfiltration channel. The AST checks do not flag the command because each individual token passes syntactic validation, yet the semantic composition yields an attack.
+
+\subsection{UNDERCOVER MODE: 57K-Word System Prompt and Article 13 Implications}
+\label{subsec:undercover}
+
+Static analysis reveals UNDERCOVER MODE, a 57,000-word system prompt instruction set (approximately 380,000 characters) embedded in the Claude Code source. Key components include:
+
+\begin{itemize}
+    \item \textbf{CYBER\_RISK\_INSTRUCTION:} Hidden safety override mechanisms that modify default tool behavior in specific repository contexts.
+    \item \textbf{TENGU Feature Flags:} Coordinated multi-agent behavior controls governing background execution, proactive behavior, and cross-agent communication.
+    \item \textbf{Obfuscation Layer:} Multi-level encoding of instruction semantics, including codename substitution (e.g., ``Capybara'' for internal model variants) and dynamic prompt boundary injection.
+\end{itemize}
+
+The scale of this instruction set raises significant questions under EU AI Act Article 13, which mandates that users be informed when interacting with AI systems and that high-risk AI systems provide ``clear and adequate'' information about their capabilities and limitations. The presence of a 57,000-word undisclosed instruction set that can modify system behavior---including the stripping of attribution, suppression of model identity, and activation of hidden feature flags---challenges the completeness of transparency disclosures.
+
+Specifically, Article 13(3) requires that AI systems ``be designed and developed in such a way that the natural persons to whom the output is addressed are informed that they are interacting with an AI system.'' UNDERCOVER MODE contains explicit instructions to remove ``any mention that you are an AI'' and to suppress the phrase ``Claude Code'' in public repository contexts, directly conflicting with transparency obligations.
+
+\section{EU AI ACT COMPLIANCE BENCHMARK}
+\label{sec:benchmark}
+
+We introduce aisec-euaiact-v1.0, a multi-label classification benchmark for EU AI Act compliance assessment. The benchmark comprises 12 verified incidents with ground-truth labels mapping to Articles 9, 13, and 15.
+
+\subsection{Task Definition}
+
+Given an AI security incident description, the task is to classify which EU AI Act article(s) are primarily violated:
+
+\begin{itemize}
+    \item \textbf{Article 9:} Risk Management System (supply chain, third-party risks).
+    \item \textbf{Article 13:} Transparency and Provision of Information (disclosure, visibility).
+    \item \textbf{Article 15:} Accuracy, Robustness, Cybersecurity (technical failures).
+\end{itemize}
+
+The label space comprises all non-empty subsets of \{9, 13, 15\}, yielding seven valid label combinations.
+
+\subsection{Label Distribution}
+
+Table~\ref{tab:labels} presents the ground-truth label distribution across the 12 verified incidents.
+
+\begin{table}[htbp]
+\caption{Benchmark Label Distribution ($n=12$)}
+\label{tab:labels}
+\centering
+\begin{tabular}{lc}
+\toprule
+\textbf{Label Combination} & \textbf{Count} \\
+\midrule
+\{9, 15\} & 5 \\
+\{9, 13\} & 2 \\
+\{13\} & 1 \\
+\{9, 13, 15\} & 1 \\
+\{13, 15\} & 1 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Table~\ref{tab:article-prevalence} shows per-article prevalence.
+
+\begin{table}[htbp]
+\caption{Per-Article Prevalence ($n=12$)}
+\label{tab:article-prevalence}
+\centering
+\begin{tabular}{lrr}
+\toprule
+\textbf{Article} & \textbf{Incidents} & \textbf{Prevalence} \\
+\midrule
+Article 9 (Risk Management) & 9 & 75.0\% \\
+Article 15 (Robustness) & 7 & 58.3\% \\
+Article 13 (Transparency) & 6 & 50.0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Evaluation Metrics}
+
+Following standard multi-label classification evaluation, we report:
+
+\begin{itemize}
+    \item \textbf{Exact Match (EM):} Proportion of predictions matching ground truth exactly.
+    \item \textbf{Precision/Recall/F1:} Micro-averaged across all labels.
+    \item \textbf{Hamming Loss:} Fraction of incorrect labels.
+    \item \textbf{Mean Jaccard Index (MJI):} Intersection over Union for label sets, providing partial credit for incomplete predictions.
+\end{itemize}
+
+Baseline results: a uniform random classifier achieves 14.3\% exact match and 0.357 mean Jaccard; the majority-class baseline (predicting \{9, 15\}) achieves 41.7\% exact match and 0.486 mean Jaccard.
+
+\section{DISCUSSION}
+\label{sec:discussion}
+
+\subsection{Limitations}
+
+Several limitations affect the generalizability of our findings.
+
+\textbf{Verification Gap:} Approximately 78\% of incidents (43/55) remain unverified with single-source attribution. This reflects the inherent challenge of incident verification in the AI security domain, where organizations may delay or avoid public disclosure.
+
+\textbf{Selection Bias:} The dataset exhibits bias toward public-facing large organizations with established security disclosure practices. Incidents at smaller organizations or in regions with weaker disclosure requirements may be underrepresented.
+
+\textbf{Temporal Constraints:} The 2025--2026 temporal boundary captures a specific period in AI security evolution. Rapid changes in LLM deployment practices may limit the relevance of incident patterns for future periods.
+
+\textbf{Attribution Uncertainty:} Threat intelligence reports may contain attribution errors or deliberate misdirection. Our confidence scoring partially addresses this but cannot eliminate uncertainty.
+
+\subsection{Ethical Considerations}
+
+This research was conducted following responsible disclosure practices:
+
+\begin{itemize}
+    \item npm source maps analyzed were publicly accessible metadata, not obtained through unauthorized access.
+    \item No active exploits were developed or deployed against production systems.
+    \item No proof-of-concept code for identified vulnerabilities has been published.
+    \item Affected organizations were notified of unpatched vulnerabilities with 90-day disclosure timelines.
+\end{itemize}
+
+The static analysis of Claude Code source files was conducted on code that was inadvertently exposed through publicly accessible source maps. Analysis was limited to security-relevant patterns and did not include extraction of proprietary business logic or training data.
+
+\section{CONCLUSION}
+\label{sec:conclusion}
+
+We present AISecIncidents-2025-26, a dataset of 55 AI security incidents with EU AI Act compliance mapping, and the first systematic static analysis of a production AI agent (Claude Code v2.1.88). Our findings include the identification of 23 AST-based security checks, a novel Semantic Desync vulnerability class, and analysis of a 57,000-word hidden instruction set with transparency implications under Article 13 of the EU AI Act.
+
+The aisec-euaiact-v1.0 benchmark provides a foundation for evaluating automated compliance classification systems. Our work bridges the empirical gap between theoretical AI security research and real-world incident documentation, providing actionable insights for practitioners and regulators developing enforcement mechanisms under the EU AI Act.
+
+Future work directions include longitudinal tracking (2027+), downstream cost analysis for organizational damages, and red team evaluation using dataset incidents as prior examples. We call for increased incident transparency norms in the AI industry to enable more comprehensive security research.
+
+\bibliographystyle{IEEEtran}
+\bibliography{bibliography}
+
+\end{document}

@@ -1,0 +1,40 @@
+cff-version: 1.2.0
+message: "If you use this dataset, please cite it using the metadata below."
+type: dataset
+title: "AISecIncidents-2025-26: A Large-Scale Dataset of Real-World AI Security Breaches with EU AI Act Compliance Mapping"
+abstract: >
+  A curated dataset of 55 AI system security incidents spanning January 2025 to
+  April 2026, covering 14 leading AI organizations. Incidents are categorized across
+  9 vulnerability classes, severity-rated, and mapped to EU AI Act Articles 9, 13,
+  and 15. Includes novel empirical evidence of unauthorized LLM distillation at
+  production scale (2.1M downloads). 12 incidents are precision-verified against
+  independent public sources; 43 are documented with structured confidence scoring.
+authors:
+  - family-names: "Alderai"
+    given-names: "Ahmed Adel Bakr"
+    email: "ahmedalderai91@gmail.com"
+    affiliation: "PhD Researcher, AI Safety & Compliance Engineering"
+version: "1.0.0"
+date-released: 2026-04-01
+license: CC-BY-4.0
+repository-code: "https://github.com/Ahmed-AdelB/ai-security-incidents-2025-2026"
+url: "https://huggingface.co/datasets/Ahmed-AdelB/ai-security-incidents-2025-2026"
+keywords:
+  - "AI security"
+  - "LLM security"
+  - "supply chain attacks"
+  - "EU AI Act"
+  - "dataset"
+  - "threat intelligence"
+  - "model distillation"
+  - "security incidents"
+  - "compliance"
+preferred-citation:
+  type: dataset
+  title: "AISecIncidents-2025-26: A Large-Scale Dataset of Real-World AI Security Breaches with EU AI Act Compliance Mapping"
+  authors:
+    - family-names: "Alderai"
+      given-names: "Ahmed Adel Bakr"
+  year: 2026
+  url: "https://huggingface.co/datasets/Ahmed-AdelB/ai-security-incidents-2025-2026"
+  doi: ""

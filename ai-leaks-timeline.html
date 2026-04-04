@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Security Incidents Timeline (2025-2026)</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 100%);
+            color: #e0e0e0;
+            overflow-x: hidden;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            font-size: 2.5em;
+            color: #ffffff;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 10px rgba(255, 0, 0, 0.3);
+        }
+
+        .subtitle {
+            font-size: 1.1em;
+            color: #a0a0a0;
+            margin-bottom: 20px;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 15px 30px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ff6b6b;
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            color: #a0a0a0;
+            margin-top: 5px;
+        }
+
+        .controls {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+        }
+
+        .control-section {
+            margin-bottom: 20px;
+        }
+
+        .control-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .control-label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #ffffff;
+            font-size: 0.95em;
+        }
+
+        .filter-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        button {
+            padding: 8px 16px;
+            background: rgba(100, 100, 150, 0.5);
+            border: 1px solid rgba(150, 150, 200, 0.6);
+            border-radius: 4px;
+            color: #e0e0e0;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background: rgba(150, 150, 200, 0.7);
+            border-color: rgba(200, 200, 255, 0.8);
+            color: #ffffff;
+        }
+
+        button.active {
+            background: linear-gradient(135deg, #ff6b6b, #ff8787);
+            border-color: #ff3333;
+            color: #ffffff;
+            font-weight: 600;
+        }
+
+        .timeline-container {
+            background: rgba(255, 255, 255, 0.03);
+            padding: 30px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+        }
+
+        #timeline {
+            position: relative;
+            height: 500px;
+            width: 100%;
+            min-width: 1200px;
+        }
+
+        .legend {
+            margin-top: 30px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .legend-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .legend-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .legend-section h4 {
+            font-size: 0.9em;
+            color: #a0a0a0;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+        }
+
+        .legend-items {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85em;
+        }
+
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .legend-pattern {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.7em;
+        }
+
+        /* Severity colors */
+        .severity-critical {
+            background: #ff3333;
+            box-shadow: 0 0 10px rgba(255, 51, 51, 0.5);
+        }
+
+        .severity-high {
+            background: #ff9933;
+            box-shadow: 0 0 8px rgba(255, 153, 51, 0.4);
+        }
+
+        .severity-medium {
+            background: #ffcc33;
+            box-shadow: 0 0 6px rgba(255, 204, 51, 0.3);
+        }
+
+        .severity-low {
+            background: #66cc66;
+            box-shadow: 0 0 6px rgba(102, 204, 102, 0.3);
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background: rgba(30, 30, 50, 0.98);
+            border: 2px solid rgba(255, 100, 100, 0.6);
+            border-radius: 8px;
+            padding: 15px;
+            color: #e0e0e0;
+            font-size: 0.85em;
+            z-index: 1000;
+            max-width: 350px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+            pointer-events: none;
+            display: none;
+        }
+
+        .tooltip.visible {
+            display: block;
+        }
+
+        .tooltip-title {
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-size: 0.95em;
+        }
+
+        .tooltip-company {
+            color: #ffaa99;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .tooltip-row {
+            margin-bottom: 5px;
+            line-height: 1.4;
+        }
+
+        .tooltip-label {
+            color: #a0a0a0;
+            font-weight: 500;
+        }
+
+        .tooltip-value {
+            color: #e0e0e0;
+        }
+
+        .tooltip-severity {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: 600;
+            font-size: 0.8em;
+            margin-top: 6px;
+            color: #ffffff;
+        }
+
+        .severity-critical-badge {
+            background: rgba(255, 51, 51, 0.7);
+        }
+
+        .severity-high-badge {
+            background: rgba(255, 153, 51, 0.7);
+        }
+
+        .severity-medium-badge {
+            background: rgba(255, 204, 51, 0.7);
+        }
+
+        .severity-low-badge {
+            background: rgba(102, 204, 102, 0.7);
+        }
+
+        /* Type icons/indicators */
+        .type-supply_chain { color: #ff6b9d; }
+        .type-source_code { color: #4ecdc4; }
+        .type-user_data { color: #45b7d1; }
+        .type-api_keys { color: #f7b731; }
+        .type-api_vulnerability { color: #ff9ff3; }
+        .type-state_sponsored_misuse { color: #ff6348; }
+        .type-system_prompt { color: #a29bfe; }
+        .type-training_data { color: #6c5ce7; }
+        .type-model_weights { color: #00b894; }
+
+        .info-text {
+            text-align: center;
+            color: #a0a0a0;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+
+        .axis-label {
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .stats {
+                gap: 15px;
+            }
+
+            .legend-content {
+                grid-template-columns: 1fr;
+            }
+
+            #timeline {
+                min-width: 100vw;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>AI Security Incidents Timeline</h1>
+            <p class="subtitle">Comprehensive visualization of AI/ML security breaches (2025-2026)</p>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="total-incidents">39</div>
+                    <div class="stat-label">Total Incidents</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="critical-count">0</div>
+                    <div class="stat-label">Critical Severity</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="affected-companies">0</div>
+                    <div class="stat-label">Companies Affected</div>
+                </div>
+            </div>
+        </header>
+
+        <div class="controls">
+            <div class="control-section">
+                <label class="control-label">Filter by Company:</label>
+                <div class="filter-buttons" id="company-filters"></div>
+            </div>
+
+            <div class="control-section">
+                <label class="control-label">Filter by Type:</label>
+                <div class="filter-buttons" id="type-filters"></div>
+            </div>
+
+            <div class="control-section">
+                <label class="control-label">Filter by Severity:</label>
+                <div class="filter-buttons" id="severity-filters"></div>
+            </div>
+        </div>
+
+        <div class="timeline-container">
+            <svg id="timeline"></svg>
+            <p class="info-text">Hover over incidents for details | Click filter buttons to show/hide incidents</p>
+        </div>
+
+        <div class="legend">
+            <div class="legend-title">Legend</div>
+            <div class="legend-content">
+                <div class="legend-section">
+                    <h4>Severity</h4>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <div class="legend-color severity-critical"></div>
+                            <span>Critical</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color severity-high"></div>
+                            <span>High</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color severity-medium"></div>
+                            <span>Medium</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color severity-low"></div>
+                            <span>Low</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="legend-section">
+                    <h4>Incident Type</h4>
+                    <div class="legend-items">
+                        <div class="legend-item">
+                            <span class="legend-pattern type-supply_chain">◆</span>
+                            <span>Supply Chain</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-pattern type-source_code">◆</span>
+                            <span>Source Code</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-pattern type-user_data">◆</span>
+                            <span>User Data</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-pattern type-api_keys">◆</span>
+                            <span>API Keys</span>
+                        </div>
+                        <div class="legend-item">
+                            <span class="legend-pattern type-training_data">◆</span>
+                            <span>Training Data</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+        // Data (hardcoded for self-containment)
+        const incidents = [
+            {"incident_name": "Meta AI Authorization Bypass", "company": "Meta", "date": "2025-01-12", "type": "api_vulnerability", "what_exposed": "Internal AI research interfaces, prototype conversational agents, model fine-tuning dashboards", "severity": "medium"},
+            {"incident_name": "Shai-Hulud npm Worm v1", "company": "npm ecosystem (AI/ML packages)", "date": "2025-09-15", "type": "supply_chain", "what_exposed": "Developer credentials, CI/CD pipeline access, ~500+ compromised npm packages", "severity": "critical"},
+            {"incident_name": "OpenAI Mixpanel Vendor Breach", "company": "OpenAI", "date": "2025-11-09", "type": "user_data", "what_exposed": "Names, email addresses, user identifiers, approximate locations, device/browser details", "severity": "medium"},
+            {"incident_name": "PRC Cyber Operation Using Claude-Based Tools", "company": "Anthropic (tools misused)", "date": "2025-11-13", "type": "state_sponsored_misuse", "what_exposed": "U.S. systems compromised via Claude-based AI tools by Chinese state-sponsored actors", "severity": "critical"},
+            {"incident_name": "Shai-Hulud npm Worm v2.0", "company": "npm ecosystem", "date": "2025-11-03", "type": "supply_chain", "what_exposed": "25K+ repositories with automated propagation", "severity": "critical"},
+            {"incident_name": "Claude Code CVE-2025-59536 (RCE via Project Files)", "company": "Anthropic", "date": "2026-02-01", "type": "source_code", "what_exposed": "Remote Code Execution through hooks in project files", "severity": "critical"},
+            {"incident_name": "Claude Code CVE-2026-21852 (API Key Exfiltration)", "company": "Anthropic", "date": "2026-02-01", "type": "api_keys", "what_exposed": "API key exfiltration via ANTHROPIC_BASE_URL substitution", "severity": "high"},
+            {"incident_name": "GitHub Copilot RoguePilot + CamoLeak", "company": "GitHub/Microsoft", "date": "2026-01-28", "type": "source_code", "what_exposed": "RCE in IDE context, code leakage from private repos, ad injection", "severity": "high"},
+            {"incident_name": "DeepSeek System Prompt Jailbreak", "company": "DeepSeek", "date": "2026-02-20", "type": "system_prompt", "what_exposed": "Full system prompt for DeepSeek-V3 and R1, safety guidelines, proprietary prompt engineering", "severity": "medium"},
+            {"incident_name": "TeamPCP Cascading Supply Chain Attack", "company": "Multiple (Aqua Security, Checkmarx, LiteLLM, Telnyx)", "date": "2026-03-08", "type": "supply_chain", "what_exposed": "Trivy vulnerability scanner zero-day, CI/CD worm, LiteLLM proxy compromise, VoIP API abuse", "severity": "critical"},
+            {"incident_name": "Meta AI Agent Rogue Data Breach (SEV1)", "company": "Meta", "date": "2026-03-20", "type": "user_data", "what_exposed": "Proprietary code, business strategies, user datasets autonomously disclosed", "severity": "critical"},
+            {"incident_name": "Google Gemini Proto File Build Pipeline Leak", "company": "Google DeepMind", "date": "2026-03-22", "type": "source_code", "what_exposed": "gemini_next.proto and gemini_agent_framework.proto - upcoming multimodal capabilities, agentic architecture", "severity": "high"},
+            {"incident_name": "Anthropic Mythos/Capybara CMS Leak", "company": "Anthropic", "date": "2026-03-26", "type": "training_data", "what_exposed": "~3,000 unpublished assets from Sanity CMS - draft blogs, CEO plans, employee docs, new model tier (Capybara) specs", "severity": "high"},
+            {"incident_name": "Anthropic Blog Assets S3 Exposure", "company": "Anthropic", "date": "2026-03-28", "type": "source_code", "what_exposed": "~3,000 draft blog posts, unreleased research graphics, internal communication about model capabilities", "severity": "medium"},
+            {"incident_name": "OpenAI GPT-5.4 Codex Repository Leak", "company": "OpenAI", "date": "2026-03-29", "type": "source_code", "what_exposed": "Partial source code for GPT-5.4's code generation subsystem", "severity": "high"},
+            {"incident_name": "Axios npm Hijack", "company": "npm ecosystem (axios)", "date": "2026-03-31", "type": "supply_chain", "what_exposed": "axios v2.0.0 with data-stealing RAT payload, millions of installs affected", "severity": "critical"},
+            {"incident_name": "Claude Code npm Source Map Leak", "company": "Anthropic", "date": "2026-03-31", "type": "source_code", "what_exposed": "Complete TypeScript source - 512,000+ lines across 1,900+ files, internal codenames, system prompts, beta features, tech stack", "severity": "critical"},
+            {"incident_name": "xAI/Grok API Key Exposure", "company": "xAI", "date": null, "type": "api_keys", "what_exposed": "xAI API key with admin access to internal systems and unreleased Grok models", "severity": "high"},
+            {"incident_name": "xAI/Grok Private Chats Database Exposure", "company": "xAI", "date": null, "type": "user_data", "what_exposed": "370K private Grok conversations accessible without authentication", "severity": "critical"},
+            {"incident_name": "xAI Insider IP Theft", "company": "xAI", "date": null, "type": "training_data", "what_exposed": "Proprietary training methodologies from former OpenAI researcher", "severity": "high"},
+            {"incident_name": "HuggingFace Token Exposure", "company": "HuggingFace", "date": null, "type": "api_keys", "what_exposed": "1,500+ API tokens with write access to private model repos", "severity": "high"},
+            {"incident_name": "LangChain Critical CVEs", "company": "LangChain", "date": null, "type": "source_code", "what_exposed": "3 critical CVEs (CVSS 9.3) enabling arbitrary code execution through agent tool calls", "severity": "critical"},
+            {"incident_name": "Perplexity AI CometJacking", "company": "Perplexity AI", "date": null, "type": "source_code", "what_exposed": "ML experiment tracking hijacking vulnerability", "severity": "high"},
+            {"incident_name": "Perplexity AI Prompt Injection", "company": "Perplexity AI", "date": null, "type": "system_prompt", "what_exposed": "System prompts and internal configurations", "severity": "medium"},
+            {"incident_name": "Replit AI Agent Database Destruction", "company": "Replit", "date": null, "type": "user_data", "what_exposed": "Production database deleted by AI coding agent", "severity": "critical"},
+            {"incident_name": "Character.AI User Data Exposure", "company": "Character.AI", "date": null, "type": "user_data", "what_exposed": "User conversation data", "severity": "high"},
+            {"incident_name": "Midjourney Artist Database Leak", "company": "Midjourney", "date": null, "type": "training_data", "what_exposed": "16,000 artist names from training data database", "severity": "high"},
+            {"incident_name": "Stability AI Training Pipeline Compromise", "company": "Stability AI", "date": "2025-01-01", "type": "training_data", "what_exposed": "Data poisoning, model exfiltration, proprietary training datasets", "severity": "high"},
+            {"incident_name": "Mistral API Key Leak + Model Inversion", "company": "Mistral AI", "date": "2025-02-01", "type": "api_keys", "what_exposed": "API keys, healthcare-fine-tuned model training data attributes via inversion attack", "severity": "high"},
+            {"incident_name": "Weights & Biases Account Takeover Campaign", "company": "Weights & Biases", "date": "2025-11-01", "type": "user_data", "what_exposed": "Experiment metadata, model artifacts, hyperparameters", "severity": "high"},
+            {"incident_name": "Pinecone Vector Database Tenant Isolation Breach", "company": "Pinecone", "date": "2025-06-01", "type": "api_vulnerability", "what_exposed": "Cross-tenant metadata access via namespace parameter manipulation", "severity": "high"},
+            {"incident_name": "Scale AI Data Labeler Backdoor Insertion", "company": "Scale AI", "date": "2026-01-01", "type": "training_data", "what_exposed": "Trigger-based backdoors in labeled training data for autonomous vehicle perception systems", "severity": "critical"},
+            {"incident_name": "Snowflake/Databricks Cross-Cloud AI Data Exfiltration", "company": "Snowflake, Databricks", "date": "2025-05-01", "type": "training_data", "what_exposed": "Raw training data, feature stores, trained model files", "severity": "critical"},
+            {"incident_name": "NVIDIA GPU Firmware Exploit 'Silicon Siphon'", "company": "NVIDIA", "date": "2025-10-01", "type": "model_weights", "what_exposed": "Model weights and activations in GPU memory during inference", "severity": "critical"},
+            {"incident_name": "EleutherAI Pile Dataset Poisoning", "company": "EleutherAI", "date": "2025-12-01", "type": "training_data", "what_exposed": "Maliciously formatted files in The Pile dataset repository", "severity": "medium"},
+            {"incident_name": "Conjecture Internal Comms Breach", "company": "Conjecture", "date": "2025-06-01", "type": "user_data", "what_exposed": "Internal discussion forum leaking AI safety research agendas and employee PII", "severity": "medium"},
+            {"incident_name": "ARC Alignment Research Spear-Phishing", "company": "ARC (Alignment Research Center)", "date": "2025-08-01", "type": "training_data", "what_exposed": "Attempted theft of eval/red-teaming model prototypes", "severity": "high"},
+            {"incident_name": "Cohere Training Data Extraction", "company": "Cohere", "date": "2025-03-01", "type": "training_data", "what_exposed": "Verbatim training text via adversarial prompts", "severity": "medium"},
+            {"incident_name": "GitHub Secrets Epidemic 2025", "company": "GitHub ecosystem", "date": "2025-12-31", "type": "api_keys", "what_exposed": "28.65 million new hardcoded secrets (API keys, cloud credentials, AI service tokens)", "severity": "critical"}
+        ];
+
+        // Process data
+        let processedData = incidents.map(d => ({
+            ...d,
+            date: d.date ? new Date(d.date) : new Date('2025-01-01'),
+            hasDate: d.date !== null
+        })).sort((a, b) => a.date - b.date);
+
+        // Calculate stats
+        const criticalCount = incidents.filter(i => i.severity === 'critical').length;
+        const companies = [...new Set(incidents.map(i => i.company))];
+
+        document.getElementById('critical-count').textContent = criticalCount;
+        document.getElementById('affected-companies').textContent = companies.length;
+
+        // Setup filters
+        const activeFilters = {
+            companies: new Set(),
+            types: new Set(),
+            severities: new Set()
+        };
+
+        // Populate filter buttons
+        function populateFilters() {
+            // Companies
+            const companyContainer = document.getElementById('company-filters');
+            companies.forEach(company => {
+                const btn = document.createElement('button');
+                btn.textContent = company;
+                btn.dataset.filter = company;
+                btn.onclick = () => {
+                    activeFilters.companies.has(company)
+                        ? activeFilters.companies.delete(company)
+                        : activeFilters.companies.add(company);
+                    btn.classList.toggle('active');
+                    updateTimeline();
+                };
+                companyContainer.appendChild(btn);
+            });
+
+            // Types
+            const types = [...new Set(incidents.map(i => i.type))];
+            const typeContainer = document.getElementById('type-filters');
+            types.forEach(type => {
+                const btn = document.createElement('button');
+                btn.textContent = type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                btn.dataset.filter = type;
+                btn.onclick = () => {
+                    activeFilters.types.has(type)
+                        ? activeFilters.types.delete(type)
+                        : activeFilters.types.add(type);
+                    btn.classList.toggle('active');
+                    updateTimeline();
+                };
+                typeContainer.appendChild(btn);
+            });
+
+            // Severities
+            const severities = ['critical', 'high', 'medium', 'low'];
+            const severityContainer = document.getElementById('severity-filters');
+            severities.forEach(severity => {
+                const btn = document.createElement('button');
+                btn.textContent = severity.charAt(0).toUpperCase() + severity.slice(1);
+                btn.dataset.filter = severity;
+                btn.onclick = () => {
+                    activeFilters.severities.has(severity)
+                        ? activeFilters.severities.delete(severity)
+                        : activeFilters.severities.add(severity);
+                    btn.classList.toggle('active');
+                    updateTimeline();
+                };
+                severityContainer.appendChild(btn);
+            });
+        }
+
+        // Filter data
+        function getFilteredData() {
+            return processedData.filter(d => {
+                const companyMatch = activeFilters.companies.size === 0 || activeFilters.companies.has(d.company);
+                const typeMatch = activeFilters.types.size === 0 || activeFilters.types.has(d.type);
+                const severityMatch = activeFilters.severities.size === 0 || activeFilters.severities.has(d.severity);
+                return companyMatch && typeMatch && severityMatch;
+            });
+        }
+
+        // D3 Timeline
+        function updateTimeline() {
+            const data = getFilteredData();
+            const svg = d3.select('#timeline');
+            svg.selectAll('*').remove();
+
+            const margin = { top: 80, right: 60, bottom: 60, left: 60 };
+            const width = Math.max(1200, data.length * 60) - margin.left - margin.right;
+            const height = 500 - margin.top - margin.bottom;
+
+            svg.attr('width', width + margin.left + margin.right)
+               .attr('height', height + margin.top + margin.bottom);
+
+            const g = svg.append('g')
+                .attr('transform', `translate(${margin.left},${margin.top})`);
+
+            // Scales
+            const xScale = d3.scaleTime()
+                .domain(d3.extent(data, d => d.date))
+                .range([0, width]);
+
+            const yScale = d3.scaleBand()
+                .domain(['critical', 'high', 'medium', 'low'])
+                .range([0, height - 100]);
+
+            // Axis
+            const xAxis = d3.axisBottom(xScale).tickFormat(d3.timeFormat('%b %Y'));
+            g.append('g')
+                .attr('transform', `translate(0,${height - 80})`)
+                .call(xAxis)
+                .style('color', '#888888')
+                .append('text')
+                .attr('y', 30)
+                .attr('x', width / 2)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#a0a0a0')
+                .style('font-size', '0.9em')
+                .text('Timeline');
+
+            // Grid
+            g.append('g')
+                .attr('stroke', '#333333')
+                .attr('stroke-opacity', 0.1)
+                .selectAll('line')
+                .data(xScale.ticks())
+                .join('line')
+                .attr('x1', d => xScale(d))
+                .attr('x2', d => xScale(d))
+                .attr('y1', -30)
+                .attr('y2', height - 80);
+
+            // Incident dots with jitter
+            const jitterWidth = 40;
+            g.selectAll('.incident-dot')
+                .data(data, d => d.incident_name)
+                .join('circle')
+                .attr('class', 'incident-dot')
+                .attr('cx', d => xScale(d.date) + (Math.random() - 0.5) * jitterWidth)
+                .attr('cy', d => {
+                    const severityIndex = ['critical', 'high', 'medium', 'low'].indexOf(d.severity);
+                    return height - 100 - 30 - (severityIndex * 60);
+                })
+                .attr('r', 8)
+                .attr('fill', d => {
+                    const colorMap = {
+                        'critical': '#ff3333',
+                        'high': '#ff9933',
+                        'medium': '#ffcc33',
+                        'low': '#66cc66'
+                    };
+                    return colorMap[d.severity];
+                })
+                .attr('stroke', '#ffffff')
+                .attr('stroke-width', 2)
+                .attr('opacity', 0.8)
+                .style('cursor', 'pointer')
+                .on('mouseenter', function(e, d) {
+                    d3.select(this).attr('r', 12).attr('opacity', 1);
+                    showTooltip(e, d);
+                })
+                .on('mouseleave', function() {
+                    d3.select(this).attr('r', 8).attr('opacity', 0.8);
+                    hideTooltip();
+                })
+                .on('click', function(e, d) {
+                    e.stopPropagation();
+                });
+
+            // Severity bands in background
+            ['critical', 'high', 'medium', 'low'].forEach((severity, i) => {
+                g.append('rect')
+                    .attr('x', -60)
+                    .attr('y', height - 100 - 60 - (i * 60))
+                    .attr('width', 50)
+                    .attr('height', 50)
+                    .attr('fill', 'none')
+                    .attr('pointer-events', 'none');
+
+                g.append('text')
+                    .attr('x', -65)
+                    .attr('y', height - 100 - 35 - (i * 60))
+                    .attr('text-anchor', 'end')
+                    .attr('dominant-baseline', 'middle')
+                    .attr('fill', '#a0a0a0')
+                    .style('font-size', '0.8em')
+                    .text(severity.charAt(0).toUpperCase() + severity.slice(1));
+            });
+
+            // Date labels on timeline
+            const dateLabels = xScale.ticks(d3.timeMonth, 2);
+            g.selectAll('.date-label')
+                .data(dateLabels)
+                .join('text')
+                .attr('x', d => xScale(d))
+                .attr('y', height - 65)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#888888')
+                .style('font-size', '0.75em')
+                .text(d3.timeFormat('%b %y'));
+        }
+
+        // Tooltip
+        function showTooltip(event, d) {
+            const tooltip = document.getElementById('tooltip');
+            const exposedText = d.what_exposed.length > 100
+                ? d.what_exposed.substring(0, 100) + '...'
+                : d.what_exposed;
+
+            const dateStr = d.date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+            tooltip.innerHTML = `
+                <div class="tooltip-title">${d.incident_name}</div>
+                <div class="tooltip-company">${d.company}</div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Date:</span>
+                    <span class="tooltip-value">${dateStr}</span>
+                </div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Type:</span>
+                    <span class="tooltip-value">${d.type.replace(/_/g, ' ').toUpperCase()}</span>
+                </div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Exposed:</span>
+                    <span class="tooltip-value">${exposedText}</span>
+                </div>
+                <div class="tooltip-severity severity-${d.severity}-badge">${d.severity.toUpperCase()}</div>
+            `;
+
+            tooltip.classList.add('visible');
+            tooltip.style.left = (event.pageX + 15) + 'px';
+            tooltip.style.top = (event.pageY - 15) + 'px';
+        }
+
+        function hideTooltip() {
+            document.getElementById('tooltip').classList.remove('visible');
+        }
+
+        // Initialize
+        populateFilters();
+        updateTimeline();
+
+        // Close tooltip on scroll
+        document.addEventListener('scroll', hideTooltip);
+    </script>
+</body>
+</html>
