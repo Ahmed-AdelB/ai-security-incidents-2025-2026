@@ -1,0 +1,61 @@
+name: Validate Dataset
+
+on:
+  push:
+    paths:
+      - 'ai-leaks-incidents-public.json'
+      - 'validate.py'
+  pull_request:
+    paths:
+      - 'ai-leaks-incidents-public.json'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: pip install jsonschema
+
+      - name: Validate dataset
+        run: python3 validate.py
+
+      - name: Check record count
+        run: |
+          COUNT=$(python3 -c "import json; d=json.load(open('ai-leaks-incidents-public.json')); print(len(d))")
+          echo "Record count: $COUNT"
+          if [ "$COUNT" -lt 50 ]; then
+            echo "ERROR: Expected at least 50 records, got $COUNT"
+            exit 1
+          fi
+
+      - name: Check verified count
+        run: |
+          python3 -c "
+          import json
+          d = json.load(open('ai-leaks-incidents-public.json'))
+          verified = [r for r in d if r.get('verified') == True]
+          print(f'Verified: {len(verified)}/{len(d)}')
+          assert len(verified) >= 10, f'Expected >=10 verified, got {len(verified)}'
+          print('All checks passed')
+          "
+
+      - name: Regenerate CSV
+        run: python3 generate_csv.py
+
+      - name: Check CSV matches JSON
+        run: |
+          python3 -c "
+          import json, csv
+          json_count = len(json.load(open('ai-leaks-incidents-public.json')))
+          with open('ai-leaks-incidents-public.csv') as f:
+              csv_count = sum(1 for _ in csv.DictReader(f))
+          assert json_count == csv_count, f'JSON ({json_count}) != CSV ({csv_count})'
+          print(f'CSV matches JSON: {csv_count} records')
+          "
