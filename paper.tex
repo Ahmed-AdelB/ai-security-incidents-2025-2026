@@ -11,6 +11,8 @@
 \usepackage{algorithm}
 \usepackage{algorithmic}
 \usepackage{url}
+\usepackage{amsthm}
+\newtheorem{definition}{Definition}
 
 % Listings configuration
 \lstset{
@@ -294,7 +296,7 @@ This vulnerability class is particularly relevant for AI agents that parse natur
 
 A concrete example illustrates this vulnerability: the LLM interprets a user request as asking for a directory listing and generates the natural language response ``please list the files.'' However, the BashTool parser expects shell command syntax and attempts to execute this string directly. The mismatch between natural language intent and shell command syntax creates unpredictable execution behavior. If the parser applies partial sanitization or interprets certain natural language phrases as shell metacharacters, the result may bypass security checks while producing unintended execution outcomes. This semantic boundary condition---where LLM-generated natural language intersects with deterministic command parsers---represents a fundamental architectural vulnerability in AI agent systems.
 
-The CVE-2025-55284 Claude Code DNS exfiltration vulnerability~\cite{cve2025_55284} exemplifies this class with technical precision. The vulnerability manifested when the LLM generated a command sequence intended as network diagnostics: \texttt{dig @resolver.query.com $(cat /etc/passwd | base64).attacker.com}. The LLM interpreted this as a diagnostic query to a nameserver, while the BashTool parser executed it as a DNS exfiltration channel encoding sensitive file contents in subdomain queries. The AST checks do not flag the command because each individual token passes syntactic validation, yet the semantic composition yields an attack.
+The CVE-2025-55284 Claude Code DNS exfiltration vulnerability~\cite{cve2025_55284} exemplifies this class with technical precision. The vulnerability manifested when the LLM generated a command sequence intended as network diagnostics: \texttt{dig @resolver.query.com \$(cat /etc/passwd | base64).attacker.com}. The LLM interpreted this as a diagnostic query to a nameserver, while the BashTool parser executed it as a DNS exfiltration channel encoding sensitive file contents in subdomain queries. The AST checks do not flag the command because each individual token passes syntactic validation, yet the semantic composition yields an attack.
 
 Mitigation strategies for Semantic Desync include: (1) constrained natural language interfaces that restrict LLM output to formally defined grammars; (2) semantic validation layers that execute commands in sandboxed environments before production deployment; (3) human-in-the-loop confirmation for commands with ambiguous semantic interpretations; and (4) runtime monitoring to detect anomalous command patterns that may indicate successful Semantic Desync exploitation.
 
