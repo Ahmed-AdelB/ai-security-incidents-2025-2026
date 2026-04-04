@@ -11,7 +11,6 @@ __pycache__/
 .env
 node_modules/
 *.egg-info/
-all-agent-outputs-combined.txt
 !*.json
 !*.csv
 !*.md
@@ -21,3 +20,37 @@ all-agent-outputs-combined.txt
 !*.bib
 !*.yaml
 !*.cff
+
+# Generated artifacts and backup files
+MANIFEST*.sha256
+all-agent-outputs-combined.txt
+*-backup.*
+META_*.md
+META_*.txt
+AI_SECURITY_INCIDENTS_AUDIT_2026.md
+NPM_TYPOSQUAT_SECURITY_ANALYSIS_2026.md
+MASTER_STRATEGY.md
+TIMELINE_REPORT.txt
+INVENTORY.md
+arXiv_draft.md
+new-incidents-to-add.md
+ai-leaks-research-2026*.md
+# Large generated/backup files — never commit
+MANIFEST*.sha256
+all-agent-outputs-combined.txt
+*-backup.*
+sprightly-tumbling-sunset.md
+# Meta analysis files (private working docs)
+META_*.md
+META_*.txt
+AI_SECURITY_INCIDENTS_AUDIT_2026.md
+NPM_TYPOSQUAT_SECURITY_ANALYSIS_2026.md
+MASTER_STRATEGY.md
+TIMELINE_REPORT.txt
+INVENTORY.md
+arXiv_draft.md
+new-incidents-to-add.md
+ai-leaks-research-2026*.md
+ai-leaks-incidents.json
+ai-leaks-incidents.csv
+
