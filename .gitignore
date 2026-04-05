@@ -51,3 +51,11 @@ paper.out
 paper.synctex.gz
 *.fls
 *.fdb_latexmk
+
+# arXiv review analysis files (working docs, not for publication)
+ARXIV_FIXES_DETAILED.md
+ARXIV_SUBMISSION_REVIEW.txt
+QUICK_FIXES_SUMMARY.txt
+REVIEW_INDEX.md
+arxiv_submission/
+arxiv_submission.tar.gz
