@@ -40,3 +40,14 @@ new-incidents-to-add.md
 ai-leaks-research-2026*.md
 ai-leaks-incidents.json
 ai-leaks-incidents.csv
+
+# LaTeX compiled artifacts — never commit
+paper.pdf
+paper.aux
+paper.log
+paper.bbl
+paper.blg
+paper.out
+paper.synctex.gz
+*.fls
+*.fdb_latexmk
