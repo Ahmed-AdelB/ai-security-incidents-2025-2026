@@ -468,9 +468,7 @@ Several limitations affect the generalizability of our findings.
 
 \textbf{Static Analysis Scope:} The analysis of Claude Code covers version 2.1.88 only. Subsequent versions may have addressed identified vulnerabilities or introduced new security controls. The findings should be interpreted as a snapshot of the security posture at a specific point in time rather than a comprehensive assessment of the system's evolution.
 
-\textbf{Regulatory Interpretation:} The mapping of incidents to EU AI Act articles represents our interpretation of regulatory requirements. Actual enforcement determinations may vary based on legal context, jurisdictional nuances, and evolving guidance from competent authorities.
-
-\textbf{Regulatory Interpretation:} EU AI Act compliance mapping involves interpretation of legal requirements that may evolve as regulatory guidance is issued. Our mapping reflects the state of knowledge as of April 2026 and should be updated as the regulatory framework matures.
+\textbf{Regulatory Interpretation:} The mapping of incidents to EU AI Act articles represents our interpretation of regulatory requirements as of April 2026. Actual enforcement determinations may vary based on legal context, jurisdictional nuances, and evolving guidance from competent authorities. Compliance mappings should be updated as implementing acts and supervisory guidance mature.
 
 \textbf{Technical Scope:} The static analysis focuses on the BashTool execution engine and does not cover all security mechanisms in Claude Code. Other tools and subsystems may have different security properties that were not analyzed in this work.
 
@@ -517,6 +515,10 @@ The findings of this work carry implications for three stakeholder groups. AI pr
 As AI systems become increasingly integrated into critical infrastructure, understanding and documenting security incidents becomes essential for risk management. This dataset provides a foundation for evidence-based security decisions and regulatory compliance assessment. We invite the research community to build upon this work, extending the dataset, improving classification methods, and developing practical tools for AI security assessment.
 
 The AISecIncidents-2025-26 dataset, benchmark labels, and evaluation scripts are available at \url{https://huggingface.co/datasets/Ahmed-AdelB/ai-security-incidents-2025-2026}. We welcome contributions of new incidents, corrections to existing records, and improvements to the compliance mapping. By fostering a collaborative approach to AI security documentation, we aim to support the development of more secure and trustworthy AI systems.
+
+\section*{DATA AVAILABILITY}
+
+The complete dataset (AISecIncidents-2025-26, 55 incidents, 12 verified) is publicly available at Zenodo \url{https://doi.org/[ZENODO_DOI]} under CC-BY-4.0 license. The dataset is also archived at \url{https://github.com/Ahmed-AdelB/ai-security-incidents-2025-2026}. Supplementary materials include the raw incident data (\texttt{ai-leaks-incidents-public.json}), the verified subset (\texttt{ai-leaks-incidents-verified-v1.0.json}), the benchmark specification (\texttt{BENCHMARK\_TASK.md}, \textit{aisec-euaiact-v1.0}, $n$=12), and the complete dataset schema (\texttt{DATASET\_CARD.md}).
 
 \bibliographystyle{IEEEtran}
 \bibliography{bibliography}
